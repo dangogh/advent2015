@@ -2,13 +2,12 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
-	"sort"
-	"strconv"
-	"strings"
+	//"sort"
+	//"strconv"
+	//"strings"
 )
 
 type Location struct {
@@ -16,13 +15,29 @@ type Location struct {
 }
 
 type House int
-type Grid map[Location]House
+type Neighborhood map[Location]*House
 
-func (loc Location) North() Location {
+func (n Neighborhood) HouseAt(loc Location) House {
+	return *(n[loc])
+}
+
+func (n Neighborhood) Visit(loc Location) {
+	if _, ok := n[loc]; !ok {
+		// hasn't yet been visited
+		n[loc] = new(House)
+	}
+	n[loc].Visit()
+}
+
+func (h *House) Visit() {
+	*h += 1
+}
+
+func (h House) Visits() int {
+	return int(h)
 }
 
 func main() {
-
 	f, err := os.Open("day2.input")
 	if err != nil {
 		log.Fatal(err)
@@ -32,19 +47,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	wrappingTotal := 0
-	ribbonTotal := 0
-	for scanner.Scan() {
+	for scanner.ScanBytes() {
 		line := scanner.Text()
-		b, err := NewBox(line)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		wrappingTotal += b.WrappingArea()
-		p := b.Perimeters()
-		ribbonTotal += p[0] + b.Volume()
 	}
-	fmt.Printf("Total wrapping paper area of %d sq ft\n", wrappingTotal)
-	fmt.Printf("Total ribbon length of %d ft\n", ribbonTotal)
+	fmt.Printf("blag\n")
 }
