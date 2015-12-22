@@ -11,24 +11,24 @@ type Location struct {
 	X, Y int
 }
 
-func (loc Location) offset(off Location) {
-	return Location{loc.X+off.X, loc.Y+off.Y}
+func (loc Location) offset(off Location) Location {
+	return Location{loc.X + off.X, loc.Y + off.Y}
 }
 
 func (loc Location) North() Location {
-  return offset(loc, Location{0,1})
+	return loc.offset(Location{0, 1})
 }
 
 func (loc Location) South() Location {
-  return offset(loc, Location{0,-1})
+	return loc.offset(Location{0, -1})
 }
 
 func (loc Location) East() Location {
-  return offset(loc, Location{1,0})
+	return loc.offset(Location{1, 0})
 }
 
 func (loc Location) West() Location {
-  return offset(loc, Location{0,1})
+	return loc.offset(Location{0, 1})
 }
 
 type House int
@@ -54,23 +54,32 @@ func (h House) Visits() int {
 	return int(h)
 }
 
-
 func main() {
 	f, err := os.Open("day2.input")
 	defer f.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
-	scanner := bufio.NewScanner(f)
-	scanner.Split(bufio.ScanRunes)
-	cur := Location{0,0}
+	reader := bufio.NewReader(f)
+	cur := Location{0, 0}
 
-	for scanner.Scan() {
-		switch scanner.Text() {
-		  case '<': cur := cur.West()
-		  case '>': cur := cur.East()
-		  case '^': cur := cur.North()
-
+	for {
+		r, _, err := reader.ReadRune()
+		if err != nil {
+			panic("bad rune")
+		}
+		switch r {
+		case '>':
+			cur = cur.East()
+		case '<':
+			cur = cur.West()
+		case '^':
+			cur = cur.North()
+		case 'v':
+			cur = cur.South()
+		default:
+			panic(fmt.Sprintf("Unknown direction %s", string(r)))
+		}
 
 	}
 	fmt.Printf("blag\n")
