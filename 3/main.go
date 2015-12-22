@@ -63,21 +63,8 @@ func (h House) Visits() int {
 	return int(h)
 }
 
-func main() {
-	var reader *bufio.Reader
-
-	if len(os.Args) == 1 {
-		reader = bufio.NewReader(os.Stdin)
-	} else {
-		f, err := os.Open(os.Args[1])
-		defer f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-		reader = bufio.NewReader(f)
-	}
+func part1(n Neighborhood, reader *bufio.Reader) {
 	cur := Location{0, 0}
-	n := make(Neighborhood)
 	for {
 		n.Visit(cur)
 		r, _, err := reader.ReadRune()
@@ -100,6 +87,55 @@ func main() {
 			panic(fmt.Sprintf("Unknown direction %s", string(r)))
 		}
 	}
+}
+
+func part2(n Neighborhood, reader *bufio.Reader) {
+
+	cur := make([]Location, 2)
+	idx := 0
+	for {
+		n.Visit(cur[idx])
+		r, _, err := reader.ReadRune()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			panic(fmt.Sprintf("bad rune %s(%d)", string(r), int(r)))
+		}
+		switch r {
+		case '>':
+			cur[idx] = cur[idx].East()
+		case '<':
+			cur[idx] = cur[idx].West()
+		case '^':
+			cur[idx] = cur[idx].North()
+		case 'v':
+			cur[idx] = cur[idx].South()
+		default:
+			panic(fmt.Sprintf("Unknown direction %s", string(r)))
+		}
+		idx = 1 - idx
+	}
+}
+
+func main() {
+	var reader *bufio.Reader
+
+	if len(os.Args) == 1 {
+		reader = bufio.NewReader(os.Stdin)
+	} else {
+		f, err := os.Open(os.Args[1])
+		defer f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		reader = bufio.NewReader(f)
+	}
+	n := make(Neighborhood)
+
+	//part1(n, reader)
+	part2(n, reader)
+
 	fmt.Printf("Neighborhood looks like this: %v\n", n)
 
 	mvisits := 0
