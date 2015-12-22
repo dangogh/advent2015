@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
@@ -28,7 +29,7 @@ func (loc Location) East() Location {
 }
 
 func (loc Location) West() Location {
-	return loc.offset(Location{0, 1})
+	return loc.offset(Location{-1, 0})
 }
 
 type House int
@@ -46,6 +47,14 @@ func (n Neighborhood) Visit(loc Location) {
 	n[loc].Visit()
 }
 
+func (n Neighborhood) String() string {
+	s := ""
+	for loc, visits := range n {
+		s += fmt.Sprintf("[ %d, %d ]: %d\n", loc.X, loc.Y, *visits)
+	}
+	return s
+}
+
 func (h *House) Visit() {
 	*h += 1
 }
@@ -55,18 +64,28 @@ func (h House) Visits() int {
 }
 
 func main() {
-	f, err := os.Open("day2.input")
-	defer f.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	reader := bufio.NewReader(f)
-	cur := Location{0, 0}
+	var reader *bufio.Reader
 
+	if len(os.Args) == 1 {
+		reader = bufio.NewReader(os.Stdin)
+	} else {
+		f, err := os.Open(os.Args[1])
+		defer f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		reader = bufio.NewReader(f)
+	}
+	cur := Location{0, 0}
+	n := make(Neighborhood)
 	for {
+		n.Visit(cur)
 		r, _, err := reader.ReadRune()
 		if err != nil {
-			panic("bad rune")
+			if err == io.EOF {
+				break
+			}
+			panic(fmt.Sprintf("bad rune %s(%d)", string(r), int(r)))
 		}
 		switch r {
 		case '>':
@@ -80,7 +99,15 @@ func main() {
 		default:
 			panic(fmt.Sprintf("Unknown direction %s", string(r)))
 		}
-
 	}
-	fmt.Printf("blag\n")
+	fmt.Printf("Neighborhood looks like this: %v\n", n)
+
+	mvisits := 0
+	for _, pv := range n {
+		if *pv > 1 {
+			mvisits++
+		}
+	}
+	fmt.Printf("Number of houses with at least one visit: %d\n", len(n))
+	fmt.Printf("Number of houses with multiple visits: %d\n", mvisits)
 }
