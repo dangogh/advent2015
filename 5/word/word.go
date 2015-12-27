@@ -4,7 +4,7 @@ import (
 	"strings"
 )
 
-type wword string
+type Word string
 
 var vowels map[rune]struct{}
 var disallowed = []string{"ab", "cd", "pq", "xy"}
@@ -16,7 +16,7 @@ func init() {
 	}
 }
 
-func (w wword) countVowels() int {
+func (w Word) countVowels() int {
 	count := 0
 	for _, c := range w {
 		if _, ok := vowels[c]; ok {
@@ -26,7 +26,7 @@ func (w wword) countVowels() int {
 	return count
 }
 
-func (w wword) hasDoubleLetters() bool {
+func (w Word) hasDoubleLetters() bool {
 	var p rune
 	for _, c := range w {
 		if p == c {
@@ -37,7 +37,7 @@ func (w wword) hasDoubleLetters() bool {
 	return false
 }
 
-func (w wword) hasDisallowedSubstring() bool {
+func (w Word) hasDisallowedSubstring() bool {
 	for _, dis := range disallowed {
 		if strings.Contains(string(w), dis) {
 			return true

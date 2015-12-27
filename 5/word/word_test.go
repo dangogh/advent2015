@@ -17,7 +17,7 @@ var wordTests = []struct {
 func TestA(t *testing.T) {
 	for _, tt := range wordTests {
 		log.Printf("%s has %d vowels, double letters? %v, restricted substrings? %v", tt.w, tt.vowels, tt.double, tt.restricted)
-		w := wword(tt.w)
+		w := Word(tt.w)
 		v := w.countVowels()
 		d := w.hasDoubleLetters()
 		r := w.hasDisallowedSubstring()
