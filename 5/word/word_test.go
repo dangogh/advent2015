@@ -1,6 +1,7 @@
 package word
 
 import (
+	"log"
 	"testing"
 )
 
@@ -15,18 +16,20 @@ var wordTests = []struct {
 
 func TestA(t *testing.T) {
 	for _, tt := range wordTests {
-		if wword(tt.w).countVowels() != tt.vowels {
-			t.Errorf("%s has %d vowels", tt.w, tt.vowels)
+		log.Printf("%s has %d vowels, double letters? %v, restricted substrings? %v", tt.w, tt.vowels, tt.double, tt.restricted)
+		w := wword(tt.w)
+		v := w.countVowels()
+		d := w.hasDoubleLetters()
+		r := w.hasDisallowedSubstring()
+
+		if v != tt.vowels {
+			t.Errorf("%s has %d(not %d) vowels", tt.w, v, tt.vowels)
 		}
-		if wword(tt.w).hasDoubleLetters() != tt.double {
-			d := ""
-			if !tt.double {
-				d = "no "
-			}
-			t.Errorf("%s has %sdouble letters", tt.w, d)
+		if d != tt.double {
+			t.Errorf("%s has double letters? %v", tt.w, d)
 		}
-		if wword(tt.w).hasDisallowedSubstring() != tt.restricted {
-			t.Errorf("%s has restricted substrings", tt.w)
+		if r != tt.restricted {
+			t.Errorf("%s has restricted substrings? %v", tt.w, r)
 		}
 	}
 }

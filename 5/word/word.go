@@ -19,7 +19,7 @@ func init() {
 func (w wword) countVowels() int {
 	count := 0
 	for _, c := range w {
-		if _, ok := vowels[c]; !ok {
+		if _, ok := vowels[c]; ok {
 			count++
 		}
 	}
@@ -27,6 +27,13 @@ func (w wword) countVowels() int {
 }
 
 func (w wword) hasDoubleLetters() bool {
+	var p rune
+	for _, c := range w {
+		if p == c {
+			return true
+		}
+		p = c
+	}
 	return false
 }
 

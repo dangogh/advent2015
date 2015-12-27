@@ -3,19 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/dangogh/advent2015/5/word"
 	"log"
 	"os"
-	"strings"
 )
-
-var vowels map[rune]struct{}
-var disallowed []string = []string{"ab", "cd", "pq", "xy"}
-
-func init() {
-	for _, x := range "aeiou" {
-		vowels[x] = struct{}{}
-	}
-}
 
 func openInput() *bufio.Reader {
 	var reader *bufio.Reader
@@ -32,39 +23,16 @@ func openInput() *bufio.Reader {
 	return reader
 }
 
-func hasDoubleLetters(s string) bool {
-	return false
-}
-
-func countVowels(s string) int {
-	count := 0
-	for _, c := range s {
-		if _, ok := vowels[c]; !ok {
-			count++
-		}
-	}
-	return count
-}
-
-func hasDisallowedSubstring(s string) bool {
-	for _, dis := range disallowed {
-		if strings.Contains(s, dis) {
-			return true
-		}
-	}
-	return false
-
-}
-
 func main() {
-	matcher := "000000"
-	t := []string{"abcdef"}
-	if len(os.Args) > 1 {
-		t = os.Args[1:]
+	reader := openInput()
+	scanner := bufio.NewScanner(reader)
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
 	}
 
-	for _, prefix := range t[:] {
-		i, cksum := findFirst(prefix, matcher)
-		fmt.Printf("%s%d gives me %s\n", prefix, i, string(cksum))
+	for scanner.Scan() {
+		w := word.word(scanner.Text())
+		fmt.Println(w)
+
 	}
 }
