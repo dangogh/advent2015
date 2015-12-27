@@ -29,7 +29,7 @@ func main() {
 	for scanner.Scan() {
 		w := word.Word(scanner.Text())
 		st := "naughty"
-		if w.IsNice() {
+		if w.IsNice2() {
 			st = "nice"
 		}
 		fmt.Printf("%s is %s\n", w, st)
