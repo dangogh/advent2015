@@ -46,3 +46,12 @@ func (w Word) hasDisallowedSubstring() bool {
 	return false
 
 }
+
+func (w Word) IsNice() bool {
+	if w.countVowels() > 2 &&
+		w.hasDoubleLetters() &&
+		!w.hasDisallowedSubstring() {
+		return true
+	}
+	return false
+}

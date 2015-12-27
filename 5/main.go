@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func openInput() *bufio.Reader {
+func main() {
 	var reader *bufio.Reader
 	if len(os.Args) == 1 {
 		reader = bufio.NewReader(os.Stdin)
@@ -18,13 +18,9 @@ func openInput() *bufio.Reader {
 		if err != nil {
 			log.Fatal(err)
 		}
+		fmt.Printf("Reading from %s\n", os.Args[1])
 		reader = bufio.NewReader(f)
 	}
-	return reader
-}
-
-func main() {
-	reader := openInput()
 	scanner := bufio.NewScanner(reader)
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
@@ -32,7 +28,11 @@ func main() {
 
 	for scanner.Scan() {
 		w := word.Word(scanner.Text())
-		fmt.Println(w)
-
+		st := "naughty"
+		if w.IsNice() {
+			st = "nice"
+		}
+		fmt.Printf("%s is %s\n", w, st)
 	}
+
 }
