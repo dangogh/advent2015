@@ -31,7 +31,7 @@ func main() {
 	}
 
 	for scanner.Scan() {
-		w := word.word(scanner.Text())
+		w := word.Word(scanner.Text())
 		fmt.Println(w)
 
 	}
