@@ -29,7 +29,7 @@ func NewSection(a, b Coord) Section {
 	return Section{Coord{x0, y0}, Coord{x1, y1}}
 }
 
-type Grid map[Coord]struct{}
+type Grid map[Coord]int
 
 var theGrid Grid
 
@@ -60,25 +60,30 @@ func (g Grid) toggleSection(s Section) {
 }
 
 func (g Grid) turnonCoord(c Coord) {
-	g[c] = struct{}{}
+	if _, ok := g[c]; !ok {
+		g[c] = 0
+	}
+	g[c]++
 }
 
 func (g Grid) turnoffCoord(c Coord) {
-	delete(g, c)
+	if _, ok := g[c]; ok {
+		g[c]--
+		if g[c] == 0 {
+			delete(g, c)
+		}
+	}
 }
 
 func (g Grid) toggleCoord(c Coord) {
-	if _, ok := g[c]; ok {
-		g.turnoffCoord(c)
-	} else {
-		g.turnonCoord(c)
-	}
+	g.turnonCoord(c)
+	g.turnonCoord(c)
 }
 
 var cmdMap map[string]func(Section)
 
 func init() {
-	theGrid = make(map[Coord]struct{})
+	theGrid = make(map[Coord]int)
 	cmdMap = map[string]func(s Section){
 		"turn on": func(s Section) {
 			theGrid.apply(s, func(c Coord) { theGrid.turnonCoord(c) })
@@ -142,5 +147,10 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	fmt.Printf("%d\n", len(theGrid))
+	var b int
+	for _, v := range theGrid {
+		b += v
+	}
+
+	fmt.Printf("%d\n", b)
 }
