@@ -87,35 +87,9 @@ func init() {
 			theGrid.apply(s, func(c Coord) { theGrid.turnoffCoord(c) })
 		},
 		"toggle": func(s Section) {
-			theGrid.apply(s, func(c Coord) { theGrid.toggleSection(s) })
+			theGrid.apply(s, func(c Coord) { theGrid.toggleCoord(c) })
 		},
 	}
-}
-
-func main() {
-	var reader *bufio.Reader
-	if len(os.Args) == 1 {
-		reader = bufio.NewReader(os.Stdin)
-	} else {
-		f, err := os.Open(os.Args[1])
-		defer f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Reading from %s\n", os.Args[1])
-		reader = bufio.NewReader(f)
-	}
-	scanner := bufio.NewScanner(reader)
-
-	//display := make(Display)
-	for scanner.Scan() {
-		line := scanner.Text()
-		err := parseAndExec(line)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
-
 }
 
 func parseAndExec(s string) error {
@@ -143,4 +117,30 @@ func parseAndExec(s string) error {
 	fmt.Printf("%s section %v\n", cmd, sec)
 	cmdMap[cmd](sec)
 	return nil
+}
+
+func main() {
+	var reader *bufio.Reader
+	if len(os.Args) == 1 {
+		reader = bufio.NewReader(os.Stdin)
+	} else {
+		f, err := os.Open(os.Args[1])
+		defer f.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Reading from %s\n", os.Args[1])
+		reader = bufio.NewReader(f)
+	}
+	scanner := bufio.NewScanner(reader)
+
+	//display := make(Display)
+	for scanner.Scan() {
+		line := scanner.Text()
+		err := parseAndExec(line)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 }
