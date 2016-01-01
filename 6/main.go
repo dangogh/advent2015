@@ -142,5 +142,5 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
+	fmt.Printf("%d\n", len(theGrid))
 }
