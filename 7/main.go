@@ -18,9 +18,6 @@ const (
 	notTok
 	lshiftTok
 	rshiftTok
-	// States
-	exprState
-	assignState
 )
 
 var commands map[string]int
@@ -39,6 +36,29 @@ func init() {
 type token struct {
 	tokenType int
 	value     interface{}
+}
+
+func (t token) String() string {
+	s := "?"
+	switch t.tokenType {
+	case andTok:
+		s = "*"
+	case orTok:
+		s = "+"
+	case notTok:
+		s = "!"
+	case rshiftTok:
+		s = ">>"
+	case lshiftTok:
+		s = "<<"
+	case numTok:
+		s = strconv.Itoa(t.value.(int))
+	case identTok:
+		s = t.value.(string)
+	default:
+		log.Fatalf("Unknown operator %d", t.tokenType)
+	}
+	return s
 }
 
 func identifyTokens(strs []string) []token {
@@ -68,47 +88,78 @@ type expression struct {
 	operands []token
 }
 
-var assignments map[string]expression
+func (e expression) String() string {
+	var s string
+	operands := make([]string, len(e.operands))
+	for _, a := range e.operands {
+		operands = append(operands, a.String())
+	}
+	if len(operands) != 1 {
+		s = strings.Join(operands, e.op.String())
+	} else {
+		s = e.op.String() + operands[0]
+	}
+	return s
+}
 
-func doCommand(line string) {
+var wireAssignments map[string]expression
+
+func init() {
+	wireAssignments = make(map[string]expression)
+}
+
+func parseWire(line string) {
 	fmt.Println("Line: ", line)
 	tokens := identifyTokens(strings.Split(line, " "))
-	// pop off last two tokens -- keep last one
-	var op int
+	for i, t := range tokens {
+		fmt.Printf("  %d - %#v\n", i, t)
+	}
+
+	var op token
 	operands := []token{}
 	for _, t := range tokens {
 		switch t.tokenType {
-		case assignTok: // not needed
 		case numTok:
 			fallthrough
 		case identTok:
 			operands = append(operands, t)
+		case assignTok: // not needed
 		default:
-			op = t.tokenType
+			op = t
 		}
 	}
-	assigned, operands := operands[len(operands)-1], operands[:len(operands)-1]
 
-	fmt.Printf("%s <- %v(%v)\n", assigned.value.(string), op, operands)
+	a, operands := operands[len(operands)-1], operands[:len(operands)-1]
+	name := a.value.(string)
+	wireAssignments[name] = expression{op, operands}
+	//fmt.Printf("%s <- %s %v\n", name, op.String(), operands)
 }
 
 func main() {
 	var reader *bufio.Reader
-	if len(os.Args) == 1 {
-		reader = bufio.NewReader(os.Stdin)
-	} else {
-		f, err := os.Open(os.Args[1])
-		defer f.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Printf("Reading from %s\n", os.Args[1])
-		reader = bufio.NewReader(f)
+	infile, wires := os.Args[1], os.Args[2:]
+	//if len(os.Args) == 1 {
+	//	reader = bufio.NewReader(os.Stdin)
+	//} else {
+	f, err := os.Open(infile)
+	defer f.Close()
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf("Reading from %s\n", infile)
+	reader = bufio.NewReader(f)
 	scanner := bufio.NewScanner(reader)
 	//display := make(Display)
 	for scanner.Scan() {
 		line := scanner.Text()
-		doCommand(line)
+		parseWire(line)
+	}
+
+	for _, w := range wires {
+		if a, ok := wireAssignments[w]; !ok {
+			log.Printf("No wire named %s\n", w)
+		} else {
+			fmt.Printf("%s <- %v\n", w, a)
+		}
 	}
 }
