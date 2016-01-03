@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	numTok = iota
-	identTok
-	assignTok
+	assignTok = iota
 	andTok
 	orTok
 	notTok
 	lshiftTok
 	rshiftTok
+	numTok
+	identTok
 )
 
 var commands map[string]int
@@ -41,6 +41,8 @@ type token struct {
 func (t token) String() string {
 	s := "?"
 	switch t.tokenType {
+	case assignTok:
+		s = "<-"
 	case andTok:
 		s = "*"
 	case orTok:
@@ -52,6 +54,7 @@ func (t token) String() string {
 	case lshiftTok:
 		s = "<<"
 	case numTok:
+		log.Printf("value of num: %d\n", t.value.(int))
 		s = strconv.Itoa(t.value.(int))
 	case identTok:
 		s = t.value.(string)
@@ -90,15 +93,11 @@ type expression struct {
 
 func (e expression) String() string {
 	var s string
-	operands := make([]string, len(e.operands))
+	operands := make([]string, 0, len(e.operands))
 	for _, a := range e.operands {
 		operands = append(operands, a.String())
 	}
-	if len(operands) != 1 {
-		s = strings.Join(operands, e.op.String())
-	} else {
-		s = e.op.String() + operands[0]
-	}
+	s = strings.Join(operands, e.op.String())
 	return s
 }
 
@@ -109,12 +108,14 @@ func init() {
 }
 
 func parseWire(line string) {
-	fmt.Println("Line: ", line)
 	tokens := identifyTokens(strings.Split(line, " "))
-	for i, t := range tokens {
-		fmt.Printf("  %d - %#v\n", i, t)
-	}
 
+	/*
+		fmt.Println("Line: ", line)
+		for i, t := range tokens {
+			fmt.Printf("  %d - %#v\n", i, t)
+		}
+	*/
 	var op token
 	operands := []token{}
 	for _, t := range tokens {
@@ -131,8 +132,23 @@ func parseWire(line string) {
 
 	a, operands := operands[len(operands)-1], operands[:len(operands)-1]
 	name := a.value.(string)
+	ops := []string{}
+	for _, t := range operands {
+		ops = append(ops, t.String())
+	}
+	//fmt.Printf("a:%s op:%s %d operands:%s\n", name, op.String(), len(ops), strings.Join(ops, ","))
 	wireAssignments[name] = expression{op, operands}
-	//fmt.Printf("%s <- %s %v\n", name, op.String(), operands)
+}
+
+func resolve(wire string) string {
+	ex := wireAssignments[wire]
+	for {
+		if t, ok := wireAssignments[a]; !ok {
+			log.Printf("No wire named %s\n", a)
+		} else {
+			fmt.Printf("%s <- %s\n", a, a.String())
+		}
+	}
 }
 
 func main() {
@@ -146,7 +162,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Reading from %s\n", infile)
+	//fmt.Printf("Reading from %s\n", infile)
 	reader = bufio.NewReader(f)
 	scanner := bufio.NewScanner(reader)
 	//display := make(Display)
@@ -156,10 +172,6 @@ func main() {
 	}
 
 	for _, w := range wires {
-		if a, ok := wireAssignments[w]; !ok {
-			log.Printf("No wire named %s\n", w)
-		} else {
-			fmt.Printf("%s <- %v\n", w, a)
-		}
+		fmt.Printf("%s resolves to %s\n", w, resolve(w))
 	}
 }
