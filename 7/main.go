@@ -54,8 +54,8 @@ func (t token) String() string {
 	case lshiftTok:
 		s = "<<"
 	case numTok:
-		log.Printf("value of num: %d\n", t.value.(int))
-		s = strconv.Itoa(t.value.(int))
+		//log.Printf("value of num: %d\n", t.value.(uint16))
+		s = strconv.Itoa(int(t.value.(uint16)))
 	case identTok:
 		s = t.value.(string)
 	default:
@@ -75,7 +75,7 @@ func identifyTokens(strs []string) []token {
 			value = nil
 		} else if intval, err := strconv.Atoi(t); err == nil {
 			tokType = numTok
-			value = intval
+			value = uint16(intval)
 		} else {
 			// TODO  check if valid identifier
 			tokType = identTok
@@ -140,15 +140,53 @@ func parseWire(line string) {
 	wireAssignments[name] = expression{op, operands}
 }
 
-func resolve(wire string) string {
-	ex := wireAssignments[wire]
-	for {
-		if t, ok := wireAssignments[a]; !ok {
-			log.Printf("No wire named %s\n", a)
-		} else {
-			fmt.Printf("%s <- %s\n", a, a.String())
-		}
+func resolveWire(wire string) (uint16, error) {
+	expr, ok := wireAssignments[wire]
+	if !ok {
+		return 0, fmt.Errorf("No wire named %s\n", wire)
 	}
+	r, err := resolveExpr(expr)
+	//log.Printf("%s resolves to %d\n", wire, r)
+	return r, err
+}
+
+func resolveExpr(expr expression) (uint16, error) {
+	ovalues := []uint16{}
+	var value uint16
+	for _, oper := range expr.operands {
+		var v uint16
+		switch oper.tokenType {
+		case numTok:
+			v = oper.value.(uint16)
+		case identTok:
+			v0, err := resolveWire(oper.value.(string))
+			if err != nil {
+				return 0, err
+			}
+			v = v0
+		default:
+			return 0, fmt.Errorf("Invalid operand %s\n", oper.String())
+		}
+		ovalues = append(ovalues, v)
+	}
+	switch expr.op.tokenType {
+	case assignTok:
+		value = ovalues[0]
+	case notTok:
+		value = ^ovalues[0]
+	case andTok:
+		value = ovalues[0] & ovalues[1]
+	case orTok:
+		value = ovalues[0] | ovalues[1]
+	case lshiftTok:
+		value = ovalues[0] << uint16(ovalues[1])
+	case rshiftTok:
+		value = ovalues[0] >> uint16(ovalues[1])
+	default:
+		return 0, fmt.Errorf("Invalid operator %s\n", expr.op.String())
+	}
+	//log.Printf("%s resolves to %d\n", expr.String(), value)
+	return value, nil
 }
 
 func main() {
@@ -172,6 +210,10 @@ func main() {
 	}
 
 	for _, w := range wires {
-		fmt.Printf("%s resolves to %s\n", w, resolve(w))
+		v, err := resolveWire(w)
+		if err != nil {
+			log.Fatalf("Error resolving %s: %v", w, err)
+		}
+		fmt.Printf("%s resolves to %d\n", w, v)
 	}
 }
