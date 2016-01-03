@@ -89,6 +89,8 @@ func identifyTokens(strs []string) []token {
 type expression struct {
 	op       token
 	operands []token
+	resolved bool
+	result   uint16
 }
 
 func (e expression) String() string {
@@ -101,10 +103,10 @@ func (e expression) String() string {
 	return s
 }
 
-var wireAssignments map[string]expression
+var wireAssignments map[string]*expression
 
 func init() {
-	wireAssignments = make(map[string]expression)
+	wireAssignments = make(map[string]*expression)
 }
 
 func parseWire(line string) {
@@ -137,7 +139,7 @@ func parseWire(line string) {
 		ops = append(ops, t.String())
 	}
 	//fmt.Printf("a:%s op:%s %d operands:%s\n", name, op.String(), len(ops), strings.Join(ops, ","))
-	wireAssignments[name] = expression{op, operands}
+	wireAssignments[name] = &expression{op, operands, false, 0}
 }
 
 func resolveWire(wire string) (uint16, error) {
@@ -145,12 +147,15 @@ func resolveWire(wire string) (uint16, error) {
 	if !ok {
 		return 0, fmt.Errorf("No wire named %s\n", wire)
 	}
-	r, err := resolveExpr(expr)
+	r, err := expr.resolveExpr()
 	//log.Printf("%s resolves to %d\n", wire, r)
 	return r, err
 }
 
-func resolveExpr(expr expression) (uint16, error) {
+func (expr *expression) resolveExpr() (uint16, error) {
+	if expr.resolved {
+		return expr.result, nil
+	}
 	ovalues := []uint16{}
 	var value uint16
 	for _, oper := range expr.operands {
@@ -186,6 +191,8 @@ func resolveExpr(expr expression) (uint16, error) {
 		return 0, fmt.Errorf("Invalid operator %s\n", expr.op.String())
 	}
 	//log.Printf("%s resolves to %d\n", expr.String(), value)
+	expr.resolved = true
+	expr.result = value
 	return value, nil
 }
 
@@ -208,7 +215,6 @@ func main() {
 		line := scanner.Text()
 		parseWire(line)
 	}
-
 	for _, w := range wires {
 		v, err := resolveWire(w)
 		if err != nil {
