@@ -10,7 +10,7 @@ import (
 
 func countAll(line string) (int, int) {
 	s := strings.TrimSpace(line)
-	countCode := 0
+	countCode := 2
 	countChars := 0
 	// skip quotes at start and end in count
 	for len(s) > 0 {
