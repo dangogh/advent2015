@@ -76,11 +76,11 @@ func main() {
 		for {
 			c := make(cityList, len(cc))
 			copy(c, cc)
+			cc = c
 			permch <- c
-			if !mathutil.PermutationNext(c) {
+			if !mathutil.PermutationNext(cc) {
 				break
 			}
-			cc = c
 		}
 	}()
 
