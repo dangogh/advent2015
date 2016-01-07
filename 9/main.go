@@ -49,6 +49,7 @@ func main() {
 		if n != 3 {
 			log.Fatalf("%d items read from %s: %v", n, line, err)
 		}
+		fmt.Printf("%s:  %s to %s = %d", line, c1, c2, dist)
 
 		if _, ok := city2city[c1]; !ok {
 			city2city[c1] = make(map[string]uint)
@@ -60,23 +61,26 @@ func main() {
 		city2city[c2][c1] = dist
 	}
 
-	cities := make(cityList, len(city2city))
+	cities := make(cityList, 0, len(city2city))
 	for c := range city2city {
 		cities = append(cities, c)
 	}
+	fmt.Printf("cities: %v\n", cities)
 
 	// channel for permutations
 	permch := make(chan cityList)
 	mathutil.PermutationFirst(cities)
 
 	go func() {
-		c := make(cityList, len(cities))
-		copy(c, cities)
+		cc := cities
 		for {
+			c := make(cityList, len(cc))
+			copy(c, cc)
 			permch <- c
 			if !mathutil.PermutationNext(c) {
 				break
 			}
+			cc = c
 		}
 	}()
 
@@ -85,6 +89,7 @@ func main() {
 
 	ch := make(chan uint)
 	for p := range permch {
+		fmt.Printf("Permutation %v\n", p)
 		go func(p cityList) {
 			var dist uint
 			var there string
