@@ -69,6 +69,7 @@ func main() {
 
 	const MaxUint = ^uint(0)
 	mindist := MaxUint
+	maxdist := uint(0)
 	mathutil.PermutationFirst(cities)
 
 	distances := make(map[string]uint, len(cities))
@@ -99,6 +100,9 @@ func main() {
 			here = there
 		}
 		distances[strings.Join(cities, ":")] = dist
+		if dist > maxdist {
+			maxdist = dist
+		}
 		if dist < mindist {
 			mindist = dist
 		}
@@ -108,4 +112,5 @@ func main() {
 	}
 
 	fmt.Printf("Min distance is %d\n", mindist)
+	fmt.Printf("Max distance is %d\n", maxdist)
 }
