@@ -65,28 +65,38 @@ func main() {
 	for c := range city2city {
 		cities = append(cities, c)
 	}
-	//fmt.Printf("cities: %v\n", cities)
+	fmt.Printf("cities: %v\n", cities)
 
 	const MaxUint = ^uint(0)
 	mindist := MaxUint
 	mathutil.PermutationFirst(cities)
 
 	distances := make(map[string]uint, len(cities))
+	first := true
 	for {
-		if !mathutil.PermutationNext(cities) {
+		if first {
+			first = false
+			mathutil.PermutationFirst(cities)
+		} else if !mathutil.PermutationNext(cities) {
 			break
 		}
 
 		//fmt.Printf("Permutation %v\n", cities)
 		var dist uint
-		var there string
-		for _, here := range cities {
-			if there == "" {
-				there = here
+		var here string
+		for _, there := range cities {
+			if here == "" {
+				here = there
 				continue
 			}
 			// how far from there to here
-			dist += city2city[there][here]
+			d, ok := city2city[here][there]
+			if !ok {
+				log.Fatalf("No distance from %s to %s?", here, there)
+			}
+			dist += d
+			//fmt.Printf("%s to %s = %d -- total %d\n", here, there, city2city[here][there], dist)
+			here = there
 		}
 		distances[strings.Join(cities, ":")] = dist
 		if dist < mindist {
