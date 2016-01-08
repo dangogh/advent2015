@@ -49,7 +49,7 @@ func main() {
 		if n != 3 {
 			log.Fatalf("%d items read from %s: %v", n, line, err)
 		}
-		fmt.Printf("%s:  %s to %s = %d", line, c1, c2, dist)
+		//fmt.Printf("%s:  %s to %s = %d", line, c1, c2, dist)
 
 		if _, ok := city2city[c1]; !ok {
 			city2city[c1] = make(map[string]uint)
@@ -65,55 +65,36 @@ func main() {
 	for c := range city2city {
 		cities = append(cities, c)
 	}
-	fmt.Printf("cities: %v\n", cities)
-
-	// channel for permutations
-	permch := make(chan cityList)
-	mathutil.PermutationFirst(cities)
-
-	go func() {
-		cc := cities
-		for {
-			c := make(cityList, len(cc))
-			copy(c, cc)
-			permch <- c
-			if !mathutil.PermutationNext(c) {
-				break
-			}
-			cc = c
-		}
-	}()
+	//fmt.Printf("cities: %v\n", cities)
 
 	const MaxUint = ^uint(0)
 	mindist := MaxUint
+	mathutil.PermutationFirst(cities)
 
-	ch := make(chan uint)
-	for p := range permch {
-		fmt.Printf("Permutation %v\n", p)
-		go func(p cityList) {
-			var dist uint
-			var there string
-			for _, here := range p {
-				if there == "" {
-					there = here
-					continue
-				}
-				// how far from there to here
-				dist += city2city[there][here]
-				if dist > mindist {
-					// give up without sending back value
-					return
-				}
+	distances := make(map[string]uint, len(cities))
+	for {
+		if !mathutil.PermutationNext(cities) {
+			break
+		}
+
+		//fmt.Printf("Permutation %v\n", cities)
+		var dist uint
+		var there string
+		for _, here := range cities {
+			if there == "" {
+				there = here
+				continue
 			}
-			// completed -- return distance calculated
-			ch <- dist
-		}(p)
-	}
-
-	for dist := range ch {
+			// how far from there to here
+			dist += city2city[there][here]
+		}
+		distances[strings.Join(cities, ":")] = dist
 		if dist < mindist {
 			mindist = dist
 		}
+	}
+	for c, d := range distances {
+		fmt.Printf("%7d %s\n", d, c)
 	}
 
 	fmt.Printf("Min distance is %d\n", mindist)
