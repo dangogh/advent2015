@@ -12,7 +12,7 @@ import (
 func main() {
 	reps := 40
 	r := 0
-	n := []byte("1121")
+	n := []byte("11")
 
 	args := os.Args[1:]
 	var err error
@@ -29,22 +29,25 @@ func main() {
 
 	next := make([]byte, 0)
 	for r < reps {
-		next = next[:0]
+		next = []byte{}
 		for len(n) > 0 {
 
 			a := n[0]
 			i := bytes.IndexFunc(n, func(r rune) bool { return a != byte(r) })
 			if i == -1 {
 				// will cause to break out..
-				i = 1
+				i = len(n)
+				n = []byte{}
+			} else {
+				//fmt.Printf("n is %s, a is %c, i is %d\n", string(n), a, i)
+				n = n[i:]
 			}
-			//fmt.Printf("n is %s, a is %c, i is %d\n", string(n), a, i)
-			n = n[i:]
 			next = append(next, byte(i)+'0', a)
 			//fmt.Printf("  next: %s\n", string(next))
 		}
 		r++
 		n = next
-		fmt.Printf("%d Current length is %d\n", r, len(n))
+		fmt.Printf("%s\n", next)
+		//fmt.Printf("%d Current length is %d\n", r, len(n))
 	}
 }
