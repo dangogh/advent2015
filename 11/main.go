@@ -26,7 +26,7 @@ func main() {
 		acc := pw.Accept()
 		if acc {
 			fmt.Printf("%s is %v\n", pw, acc)
+			break
 		}
-		break
 	}
 }

@@ -61,12 +61,12 @@ func (w Word) DoubleCount() bool {
 		}
 		if prev == a {
 			dbl++
-			if dbl >= 2 {
-				return true
-			}
+			prev = 0
+		} else {
+			prev = a
 		}
 	}
-	return false
+	return dbl >= 2
 }
 
 func (w Word) Accept() bool {

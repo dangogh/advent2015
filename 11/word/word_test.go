@@ -5,13 +5,14 @@ import (
 )
 
 var testMap = map[string][]bool{
-	"i":        {false, false, false},
-	"a":        {false, true, false},
-	"hijklmmn": {true, false, false},
-	"abbceffg": {false, true, true},
-	"abbcegjk": {false, true, false},
-	"abcdffaa": {true, true, true},
-	"ghkaabcc": {true, true, true},
+	"abcdefgaa": {true, true, false},
+	"i":         {false, false, false},
+	"a":         {false, true, false},
+	"hijklmmn":  {true, false, false},
+	"abbceffg":  {false, true, true},
+	"abbcegjk":  {false, true, false},
+	"abcdffaa":  {true, true, true},
+	"ghkaabcc":  {true, true, true},
 }
 
 func TestSequentialOf(t *testing.T) {
@@ -29,6 +30,16 @@ func TestIllegalchars(t *testing.T) {
 		w := Word(k)
 		if res[1] != !w.HasIllegalchars() {
 			t.Errorf("%s has illegal characters: %v", k, w.HasIllegalchars())
+		}
+	}
+}
+
+func TestDoubleCount(t *testing.T) {
+
+	for k, res := range testMap {
+		w := Word(k)
+		if res[2] != w.DoubleCount() {
+			t.Errorf("%s has 2 double chars: %v", k, w.DoubleCount())
 		}
 	}
 }
