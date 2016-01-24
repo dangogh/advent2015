@@ -3,6 +3,9 @@ package main
 import (
 	"./word"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
 )
 
 func PasswordGenerator(initialPw word.Word) chan word.Word {
@@ -20,13 +23,23 @@ func PasswordGenerator(initialPw word.Word) chan word.Word {
 }
 
 func main() {
+	var num int
+	if len(os.Args) > 1 {
+		var err error
+		if num, err = strconv.Atoi(os.Args[1]); err != nil {
+			log.Fatalf("Expected number of passwords to generate,  got %s", os.Args[1])
+		}
+	}
 	pwch := PasswordGenerator("hepxcrrq")
 
 	for pw := range pwch {
 		acc := pw.Accept()
 		if acc {
 			fmt.Printf("%s is %v\n", pw, acc)
-			break
+			num--
+			if num <= 0 {
+				break
+			}
 		}
 	}
 }
