@@ -20,7 +20,7 @@ func PasswordGenerator(initialPw word.Word) chan word.Word {
 }
 
 func main() {
-	pwch := PasswordGenerator("abcdefzz")
+	pwch := PasswordGenerator("hepxcrrq")
 
 	for pw := range pwch {
 		acc := pw.Accept()
