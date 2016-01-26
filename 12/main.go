@@ -9,15 +9,22 @@ import (
 	"unicode"
 )
 
+func isNum(c byte) bool {
+	return (c == '-') || (unicode.IsDigit(rune(c)))
+}
+
 func addInts(a string) int {
 	s := bufio.NewScanner(strings.NewReader(a))
 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		fmt.Printf("string is %s\n", string(data))
 		var i int
+		if len(data) == 0 {
+			return 0, nil, nil
+		}
 		c := data[0]
-		isnum := (c == '-') || (unicode.IsDigit(rune(c)))
+		isnum := isNum(c)
 		for i, c = range data {
-			if unicode.IsDigit(rune(c)) != isnum {
+			if isNum(c) != isnum {
 				fmt.Printf(" token %s is num? %v\n", string(data[:i]), isnum)
 				return i, data[:i], nil
 			}
