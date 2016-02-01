@@ -3,6 +3,8 @@ package main
 import (
 	"bufio"
 	"bytes"
+	_ "encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -57,15 +59,22 @@ func addInts(r io.Reader) int {
 }
 
 func main() {
+	var part1 bool
+	flag.BoolVar(&part1, "part1", false, "use part1 method")
+	flag.Parse()
 	f := os.Stdin
-	if len(os.Args) > 1 {
+	if len(flag.Args()) > 0 {
 		var err error
-		f, err = os.Open(os.Args[1])
+		f, err = os.Open(flag.Args()[0])
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 	reader := bufio.NewReader(f)
-	s := addInts(reader)
+
+	var s int
+	if part1 {
+		s = addInts(reader)
+	}
 	fmt.Printf("%d\n", s)
 }
