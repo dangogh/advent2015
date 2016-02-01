@@ -3,7 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
-	_ "encoding/json"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -58,6 +58,36 @@ func addInts(r io.Reader) int {
 	return sum
 }
 
+func addIntsJSON(top interface{}) (s int, red bool) {
+	defer func() { fmt.Println(s) }()
+	//var s int
+	switch topv := top.(type) {
+	case float64:
+		s = int(topv)
+	case string:
+		if topv == "red" {
+			red = true
+		}
+	case []interface{}:
+		for _, v := range topv {
+			vv, _ := addIntsJSON(v)
+			s += vv
+		}
+	case map[string]interface{}:
+		for _, v := range topv {
+			vv, red := addIntsJSON(v)
+			if red {
+				return 0, false
+			}
+			s += vv
+		}
+	default:
+		log.Fatalf("Don't know how to handle %+v(%T)", topv, topv)
+	}
+
+	return s, red
+}
+
 func main() {
 	var part1 bool
 	flag.BoolVar(&part1, "part1", false, "use part1 method")
@@ -75,6 +105,16 @@ func main() {
 	var s int
 	if part1 {
 		s = addInts(reader)
+	} else {
+		// part2 -- load json
+		var top interface{}
+		json.NewDecoder(reader).Decode(&top)
+		var red bool
+		s, red = addIntsJSON(top)
+		if red {
+			s = 0
+		}
 	}
+
 	fmt.Printf("%d\n", s)
 }
