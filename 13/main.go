@@ -18,11 +18,10 @@ type matrix map[string]map[string]int
 
 func (m matrix) String() string {
 	order := []string{}
-	table := []string{""}
-	    table[0] += 
 	for n, _ := range m {
 		order = append(order, n)
 	}
+	table := []string{"\t" + strings.Join(order, "\t")}
 
 	for _, n := range order {
 		row := []string{n}
@@ -82,4 +81,5 @@ func main() {
 		log.Fatalf("%s", err)
 	}
 	fmt.Printf("Pairings:\n%s\n", ss.String())
+
 }
