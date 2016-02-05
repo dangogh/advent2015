@@ -2,9 +2,6 @@ package ring
 
 import ()
 
-// Ring is a cyclic sequence of bytes
-type Ring []byte
-
 // Permute returns channel with a sequence of unique permutations of the ring
 func (r Ring) Permute() chan Ring {
 	ch := make(chan Ring)
