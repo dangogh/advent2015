@@ -1,0 +1,21 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+my $time = shift || 2503;
+while (<>) {
+	my @parts = /(\w+) can fly (\d+) km\/s for (\d+) seconds, but then must rest for (\d+) seconds./;
+	my ( $name, $speed, $dur, $rest ) = @parts;
+	my $t = $time;
+	my $d = 0;
+	while ( $t > 0 ) {
+		if ( $t < $dur ) {
+			$d += $t * $speed;
+			last;
+		}
+		$d += $speed * $dur;
+		$t -= ( $dur + $rest );
+	}
+	print "$name traveled $d\n";
+}
