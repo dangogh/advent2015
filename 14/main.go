@@ -22,7 +22,8 @@ type reindeer struct {
 func (r reindeer) DistanceAt(time int) int {
 	i := time / (r.Duration + r.Rest)
 	rem := time % (r.Duration + r.Rest)
-	d := i * r.Speed
+	fmt.Printf("at %d,  %d intervals with %d remaining\n", time, i, rem)
+	d := i * r.Duration * r.Speed
 	if rem > r.Duration {
 		rem = r.Duration
 	}
@@ -30,9 +31,9 @@ func (r reindeer) DistanceAt(time int) int {
 	return d
 }
 
-func loadTeam(r io.Reader) ([]reindeer, error) {
+func loadTeam(r io.Reader) ([]*reindeer, error) {
 	re := regexp.MustCompile(`(\w+) can fly (\d+) km/s for (\d+) seconds, but then must rest for (\d+) seconds.`)
-	var team []reindeer
+	var team []*reindeer
 	s := bufio.NewScanner(r)
 	s.Split(bufio.ScanLines)
 	for s.Scan() {
@@ -57,7 +58,7 @@ func loadTeam(r io.Reader) ([]reindeer, error) {
 		}
 
 		r := reindeer{Name: string(m[1]), Speed: speed, Duration: duration, Rest: rest}
-		team = append(team, r)
+		team = append(team, &r)
 	}
 	return team, nil
 }
@@ -67,7 +68,7 @@ type trial struct {
 	Distance int
 }
 
-func travel(team []reindeer, totalTime int) chan trial {
+func travel(team []*reindeer, totalTime int) chan trial {
 	ch := make(chan trial)
 	for _, r := range team {
 		rr := r
@@ -82,7 +83,7 @@ func travel(team []reindeer, totalTime int) chan trial {
 				dist += rr.Speed * rr.Duration
 				time -= (rr.Duration + rr.Rest)
 			}
-			ch <- trial{rr, dist}
+			ch <- trial{*rr, dist}
 		}()
 	}
 	return ch
@@ -116,16 +117,18 @@ func main() {
 	}
 	fmt.Println("Max distance was ", max)
 
-	for i := 0; i <= 2503; i++ {
-		var lead reindeer
+	for i := 1; i <= 2503; i++ {
+		max := 0
+		var lead *reindeer
 		for _, r := range team {
 			d := r.DistanceAt(i)
 			if d > max {
-				d = max
+				max = d
 				lead = r
 			}
 		}
-		lead.Points++
+		fmt.Printf("%s has the lead at %d (%d)\n", lead.Name, i, max)
+		(*lead).Points++
 	}
 	for _, r := range team {
 		fmt.Printf("%+v\n", r)
