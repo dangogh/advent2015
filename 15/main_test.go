@@ -7,7 +7,7 @@ import (
 
 func Test2Ingredient(t *testing.T) {
 
-	test_input := `
+	testInput := `
 Butterscotch: capacity -1, durability -2, flavor 6, texture 3, calories 8
 Cinnamon: capacity 2, durability 3, flavor -2, texture -1, calories 3
 `
@@ -21,7 +21,7 @@ Cinnamon: capacity 2, durability 3, flavor -2, texture -1, calories 3
 		Calories   int
 	}
 
-	r := strings.NewReader(test_input)
+	r := strings.NewReader(testInput)
 	ingr := ReadIngredients(r)
 	var cp, d, f, tx, cl int
 	for _, i := range ingr {
