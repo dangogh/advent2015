@@ -13,22 +13,22 @@ type auntsue struct {
 	props map[string]int
 }
 
-var detected = map[string]int{
-	"children":    3,
-	"cats":        7,
-	"samoyeds":    2,
-	"pomeranians": 3,
-	"akitas":      0,
-	"vizslas":     0,
-	"goldfish":    5,
-	"trees":       3,
-	"cars":        2,
-	"perfumes":    1,
+var detected = map[string]func(int) bool{
+	"children":    func(i int) bool { return i == 3 },
+	"cats":        func(i int) bool { return i > 7 },
+	"samoyeds":    func(i int) bool { return i == 2 },
+	"pomeranians": func(i int) bool { return i < 3 },
+	"akitas":      func(i int) bool { return i == 0 },
+	"vizslas":     func(i int) bool { return i == 0 },
+	"goldfish":    func(i int) bool { return i < 5 },
+	"trees":       func(i int) bool { return i > 3 },
+	"cars":        func(i int) bool { return i == 2 },
+	"perfumes":    func(i int) bool { return i == 1 },
 }
 
 var debug = make(chan string)
 
-func filter(inch <-chan auntsue, key string, val int) chan auntsue {
+func filter(inch <-chan auntsue, key string, f func(int) bool) chan auntsue {
 	outch := make(chan auntsue)
 	go func() {
 		defer close(outch)
@@ -41,7 +41,7 @@ func filter(inch <-chan auntsue, key string, val int) chan auntsue {
 		for s := range inch {
 			countall++
 			if v, ok := s.props[key]; ok {
-				if v != val {
+				if !f(v) {
 					// known and not same as detected
 					continue
 				} else {
@@ -50,7 +50,7 @@ func filter(inch <-chan auntsue, key string, val int) chan auntsue {
 			countmatch++
 			outch <- s
 		}
-		debug <- fmt.Sprintf("%d/%d match %s=%d\n", countmatch, countall, key, val)
+		debug <- fmt.Sprintf("%d/%d match %s\n", countmatch, countall, key)
 	}()
 	return outch
 }
