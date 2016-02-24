@@ -26,53 +26,82 @@ var detected = map[string]int{
 	"perfumes":    1,
 }
 
-func main() {
-	ch0 := make(chan auntsue)
-	debug := make(chan string)
+var debug = make(chan string)
+
+func filter(inch <-chan auntsue, key string, val int) chan auntsue {
+	outch := make(chan auntsue)
 	go func() {
-		fmt.Println(<-debug)
+		defer close(outch)
+		var countmatch, countall int
+		if _, ok := detected[key]; !ok {
+			fmt.Println("No key ", key)
+			os.Exit(1)
+		}
+
+		for s := range inch {
+			countall++
+			if v, ok := s.props[key]; ok {
+				if v != val {
+					// known and not same as detected
+					continue
+				} else {
+				}
+			}
+			countmatch++
+			outch <- s
+		}
+		debug <- fmt.Sprintf("%d/%d match %s=%d\n", countmatch, countall, key, val)
+	}()
+	return outch
+}
+
+func readInput(ch chan<- auntsue) {
+	defer close(ch)
+	f, _ := os.Open(os.Args[1])
+	s := bufio.NewScanner(f)
+	s.Split(bufio.ScanLines)
+	for s.Scan() {
+		t := s.Text()
+		i := strings.Index(t, ":")
+		id, _ := strconv.Atoi(t[4:i])
+		t = t[i+1:]
+		sue := auntsue{id: id, props: map[string]int{}}
+		for _, pstr := range strings.Split(t, ",") {
+			i := strings.Index(pstr, ":")
+			k := strings.TrimSpace(pstr[:i])
+			v, err := strconv.Atoi(pstr[i+2:])
+			if err != nil {
+				debug <- fmt.Sprintf("%v\n", err)
+			}
+			sue.props[k] = v
+		}
+		//debug <- fmt.Sprintf("readInput: %v\n", sue)
+		ch <- sue
+	}
+}
+
+func main() {
+	go func() {
+		for {
+			s := <-debug
+			if s == "" {
+				break
+			}
+			fmt.Println(s)
+		}
 	}()
 
-	go func() {
-		f, _ := os.Open("input.txt")
-		s := bufio.NewScanner(f)
-		s.Split(bufio.ScanLines)
-		for s.Scan() {
-			t := s.Text()
-			i := strings.Index(t, ":")
-			id, _ := strconv.Atoi(t[4:i])
-			t = t[i+1:]
-			s := auntsue{id: id, props: make(map[string]int)}
-			for _, pstr := range strings.Split(t, ",") {
-				i := strings.Index(pstr, ":")
-				k := pstr[:i]
-				v, err := strconv.Atoi(pstr[i+2:])
-				if err != nil {
-					debug <- fmt.Sprintf("%v\n", err)
-				}
-				s.props[k] = v
-			}
-			ch0 <- s
-		}
-		close(ch0)
-	}()
+	ch := make(chan auntsue)
+	go readInput(ch)
 
 	for k, v := range detected {
-		ch1 := make(chan auntsue)
-		go func() {
-			for s := range ch0 {
-				debug <- fmt.Sprintf("%s=%d for %+v?\n", k, v, s)
-				if n, ok := s.props[k]; ok {
-					if n == v {
-						ch1 <- s
-					}
-				}
-			}
-			close(ch1)
-		}()
-		ch0 = ch1
+		fmt.Println("Filtering ", k, v)
+		ch = filter(ch, k, v)
 	}
-	for s := range ch0 {
-		fmt.Printf("Sue %+v\n", s)
+	sues := make([]auntsue, 0)
+	for s := range ch {
+		sues = append(sues, s)
 	}
+
+	fmt.Printf("Sue %+v\n", sues)
 }
