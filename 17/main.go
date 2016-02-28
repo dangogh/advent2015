@@ -56,7 +56,17 @@ func main() {
 		volumecheck(max, 0, []int{}, containers, meets)
 	}()
 
+	minContainers := len(containers)
+	var numMin = 0
 	for a := range meets {
+		if len(a) < minContainers {
+			numMin = 1
+			minContainers = len(a)
+		} else if len(a) == minContainers {
+			numMin++
+		}
 		fmt.Printf("%+v\n", a)
 	}
+
+	fmt.Printf("%d combinations of %d containers\n", numMin, minContainers)
 }
