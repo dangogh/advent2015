@@ -151,4 +151,12 @@ func TestAlternating2(t *testing.T) {
 		t.Errorf("alt2 edge turns off")
 	}
 
+	c = g[2][1]
+	if g.liveneighbors(c) != 3 {
+		t.Errorf("alt2 edge w/3 neighbors")
+	}
+	if !g.willLive(c) {
+		t.Errorf("edge comes alive")
+	}
+
 }
