@@ -59,7 +59,7 @@ func (g grid) willLive(c cell) bool {
 }
 
 func (g grid) nextStage() grid {
-	newg := make(grid, 0)
+	newg := make(grid, 0, len(g))
 	for _, row := range g {
 		var newrow []cell
 		for _, c := range row {
@@ -101,7 +101,7 @@ func main() {
 	var g grid
 	for s.Scan() {
 		t := s.Text()
-		row := make([]cell, len(t))
+		row := make([]cell, 0, len(t))
 		for i, st := range t {
 			var on bool
 			if st == rune('#') {
@@ -110,10 +110,10 @@ func main() {
 			row = append(row, cell{x: j, y: i, on: on})
 		}
 		g = append(g, row)
-		fmt.Printf("%s\n", t)
 	}
 
-	fmt.Printf(g.String())
-	n := g.nextStage()
-	fmt.Printf(n.String())
+	for range []int{1, 2, 3, 4, 5} {
+		fmt.Println(g.String())
+		g = g.nextStage()
+	}
 }
