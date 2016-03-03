@@ -72,6 +72,10 @@ func (g grid) livecells() int {
 }
 
 func (g grid) willLive(c cell) bool {
+	// if a corner light,  always on
+	if (c.x == 0 || c.x == len(g)-1) && (c.y == 0 || c.y == len(g)-1) {
+		return true
+	}
 	switch g.liveneighbors(c) {
 	case 2:
 		// don't change
@@ -137,10 +141,16 @@ func main() {
 		j++
 		g = append(g, row)
 	}
+	g[0][0].on = true
+	g[0][len(g)-1].on = true
+	g[len(g)-1][0].on = true
+	g[len(g)-1][len(g)-1].on = true
 
+	fmt.Println("Initial state:\n", g.String())
 	fmt.Printf("Start with %d live cells\n", g.livecells())
 	for i := 0; i < 100; i++ {
 		g = g.nextStage()
+		fmt.Println(g.String())
 		fmt.Println(g.livecells())
 	}
 }
