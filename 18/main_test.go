@@ -30,14 +30,26 @@ var tests = map[string]grid{
 	},
 }
 
+func TestGrid(t *testing.T) {
+	for _, g := range tests {
+		for j := range g {
+			for i, c := range g[j] {
+				if c.y != j || c.x != i {
+					t.Errorf("Cell %v not at %d,%d", c, j, i)
+				}
+			}
+		}
+	}
+}
+
 func TestNoNeighbors(t *testing.T) {
 	g := tests["none"]
 	c := g[0][0]
 	if g.liveneighbors(c) != 0 {
-		t.Errorf("lone cell has no neighbors")
+		t.Errorf("lone cell has no neighbors -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("lone cell turns off")
+		t.Errorf("lone cell turns off -- found %d\n", g.liveneighbors(c))
 	}
 }
 
@@ -45,27 +57,27 @@ func TestAllOff(t *testing.T) {
 	g := tests["alloff"]
 	c := g[1][1]
 	if g.liveneighbors(c) != 0 {
-		t.Errorf("no on neigbors")
+		t.Errorf("no on neigbors -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alloff stays off")
+		t.Errorf("alloff stays off -- found %d\n", g.liveneighbors(c))
 	}
 
 	// test corner/edge
 	c = g[0][2]
 	if g.liveneighbors(c) != 0 {
-		t.Errorf("no on neighbors from corner")
+		t.Errorf("no on neighbors from corner -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alloff corner stays off")
+		t.Errorf("alloff corner stays off -- found %d\n", g.liveneighbors(c))
 	}
 
 	c = g[1][2]
 	if g.liveneighbors(c) != 0 {
-		t.Errorf("no on neighbors from edge")
+		t.Errorf("no on neighbors from edge -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alloff edge stays off")
+		t.Errorf("alloff edge stays off -- found %d\n", g.liveneighbors(c))
 	}
 }
 
@@ -73,28 +85,29 @@ func TestAllOn(t *testing.T) {
 	g := tests["allon"]
 	c := g[1][1]
 	if g.liveneighbors(c) != 8 {
-		t.Errorf("allon neigbors")
+		t.Errorf("allon neigbors -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("allon center turns off")
+		t.Errorf("allon center turns off -- found %d\n", g.liveneighbors(c))
 	}
 
 	// test corner
 	c = g[2][0]
 	if g.liveneighbors(c) != 3 {
-		t.Errorf("allon at corner")
+		t.Logf("GRID:\n%+v\n", g)
+		t.Errorf("allon at corner -- found %d\n", g.liveneighbors(c))
 	}
 	if !g.willLive(c) {
-		t.Errorf("allon corner stays on")
+		t.Errorf("allon corner stays on -- found %d\n", g.liveneighbors(c))
 	}
 
 	// test edge
 	c = g[2][1]
 	if g.liveneighbors(c) != 5 {
-		t.Errorf("allon at edge")
+		t.Errorf("allon at edge -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("allon edge turns off")
+		t.Errorf("allon edge turns off -- found %d\n", g.liveneighbors(c))
 	}
 }
 
@@ -102,26 +115,26 @@ func TestAlternating(t *testing.T) {
 	g := tests["alternating"]
 	c := g[0][0]
 	if g.liveneighbors(c) != 1 {
-		t.Errorf("alt corner")
+		t.Errorf("alt corner -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alt corner turns off")
+		t.Errorf("alt corner turns off -- found %d\n", g.liveneighbors(c))
 	}
 
 	c = g[1][0]
 	if g.liveneighbors(c) != 3 {
-		t.Errorf("alt at edge")
+		t.Errorf("alt at edge -- found %d\n", g.liveneighbors(c))
 	}
 	if !g.willLive(c) {
-		t.Errorf("alt edge turns on")
+		t.Errorf("alt edge turns on -- found %d\n", g.liveneighbors(c))
 	}
 
 	c = g[1][1]
 	if g.liveneighbors(c) != 4 {
-		t.Errorf("alt in center")
+		t.Errorf("alt in center -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alt in center turns off")
+		t.Errorf("alt in center turns off -- found %d\n", g.liveneighbors(c))
 	}
 }
 
@@ -129,34 +142,33 @@ func TestAlternating2(t *testing.T) {
 	g := tests["alternating2"]
 	c := g[0][0]
 	if g.liveneighbors(c) != 2 {
-		t.Errorf("alt2 corner")
+		t.Errorf("alt2 corner -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alt2 corner turns off")
+		t.Errorf("alt2 corner turns off -- found %d\n", g.liveneighbors(c))
 	}
 
 	c = g[1][0]
 	if g.liveneighbors(c) != 2 {
-		t.Errorf("alt2 edge stays on")
+		t.Errorf("alt2 edge -- found %d\n", g.liveneighbors(c))
 	}
 	if !g.willLive(c) {
-		t.Errorf("alt2 edge stays on")
+		t.Errorf("alt2 edge stays on -- found %d\n", g.liveneighbors(c))
 	}
 
 	c = g[1][1]
 	if g.liveneighbors(c) != 4 {
-		t.Errorf("alt2 in center")
+		t.Errorf("alt2 in center -- found %d\n", g.liveneighbors(c))
 	}
 	if g.willLive(c) {
-		t.Errorf("alt2 edge turns off")
+		t.Errorf("alt2 edge turns off -- found %d\n", g.liveneighbors(c))
 	}
 
 	c = g[2][1]
-	if g.liveneighbors(c) != 3 {
-		t.Errorf("alt2 edge w/3 neighbors")
+	if g.liveneighbors(c) != 2 {
+		t.Errorf("alt2 edge w/2 neighbors -- got %d with\n%s", g.liveneighbors(c), g.String())
 	}
 	if !g.willLive(c) {
-		t.Errorf("edge comes alive")
+		t.Errorf("edge comes alive -- found %d\n", g.liveneighbors(c))
 	}
-
 }

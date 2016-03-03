@@ -17,26 +17,39 @@ type cell struct {
 
 type grid [][]cell
 
+func bounds(min, max, a, b int) (int, int) {
+	if a < min {
+		a = min
+	}
+	if b > max {
+		b = max
+	}
+	return a, b
+}
+
 func (g grid) liveneighbors(c cell) int {
-	lowerx, upperx := c.x-1, c.x+1
-	lowery, uppery := c.y-1, c.y+1
-	if lowerx == -1 {
-		lowerx = 0
-	}
-	if lowery == -1 {
-		lowery = 0
-	}
-	if upperx == len(g) {
-		upperx = len(g) - 1
-	}
-	if uppery == len(g[0]) {
-		uppery = len(g[0]) - 1
+	lowerx, upperx := bounds(0, len(g)-1, c.x-1, c.x+1)
+	lowery, uppery := bounds(0, len(g)-1, c.y-1, c.y+1)
+
+	d := false
+	if d {
+		fmt.Printf("start  %d,%d -> %d,%d\n", lowerx, lowery, upperx, uppery)
+		fmt.Printf("%s\n", g.String())
 	}
 	var n int
-	for j := lowerx; j <= upperx; j++ {
-		for i := lowery; i <= uppery; i++ {
+
+	if d {
+		fmt.Printf("-------------------\n")
+		fmt.Printf("  %d,%d -> %d,%d\n", lowery, lowerx, uppery, upperx)
+	}
+
+	for i := lowery; i <= uppery; i++ {
+		for j := lowerx; j <= upperx; j++ {
 			if j == c.x && i == c.y {
 				continue
+			}
+			if d {
+				fmt.Printf("%d,%d  %v -- %v\n", i, j, c, g[j][i])
 			}
 			if g[j][i].on {
 				n++
@@ -44,6 +57,18 @@ func (g grid) liveneighbors(c cell) int {
 		}
 	}
 	return n
+}
+
+func (g grid) livecells() int {
+	var live int
+	for _, r := range g {
+		for _, c := range r {
+			if c.on {
+				live++
+			}
+		}
+	}
+	return live
 }
 
 func (g grid) willLive(c cell) bool {
@@ -109,11 +134,13 @@ func main() {
 			}
 			row = append(row, cell{x: j, y: i, on: on})
 		}
+		j++
 		g = append(g, row)
 	}
 
-	for range []int{1, 2, 3, 4, 5} {
-		fmt.Println(g.String())
+	fmt.Printf("Start with %d live cells\n", g.livecells())
+	for i := 0; i < 100; i++ {
 		g = g.nextStage()
+		fmt.Println(g.livecells())
 	}
 }
