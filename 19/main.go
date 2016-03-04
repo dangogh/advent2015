@@ -40,16 +40,29 @@ func main() {
 	}
 
 	// Now go thru the string and do the subs
-	combos := map[string]struct{}{mystr: struct{}{}}
+	combos := make(map[string]struct{})
 
 	fmt.Println("line is ", mystr)
-	for _, p := range sub {
-		w := strings.Replace(mystr, p.a, p.b, -1)
-		fmt.Printf("Replacing %s with %s\n", p.a, p.b)
-		combos[w] = struct{}{}
+	for i, p := range sub {
+		fmt.Printf("%d %+v\n", i, p)
+		var cur int
+		for cur < len(mystr) {
+			j := strings.Index(mystr[cur:], p.a)
+			if j == -1 {
+				break
+			}
+			cur += j
+			w := mystr[:cur] + p.b + mystr[cur+len(p.a):]
+			fmt.Printf("Replacing %s with %s\n", p.a, p.b)
+			fmt.Println(" got ", w)
+			combos[w] = struct{}{}
+			cur += len(p.a)
+			fmt.Println(i, " cur is ", cur, " remaining ", mystr[cur:])
+		}
 	}
 
-	for s, _ := range combos {
+	for s := range combos {
 		fmt.Println(s)
 	}
+	fmt.Println(len(combos), " molecules")
 }
