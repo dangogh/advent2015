@@ -61,43 +61,28 @@ func uniqueCombinations(subs []pair, formula string) map[string]struct{} {
 	return combos
 }
 
-var seen = make(map[string]struct{})
-
-func generate(word string, subs []pair) []string {
-	res := make([]string, 0, len(subs))
+func solveFormula(level int, start, target string, subs []pair) int {
+	if target == start {
+		return level
+	}
+	var seen = make(map[string]struct{})
 	for _, p := range subs {
-		j := strings.Index(word, p.a)
-		if j == -1 {
-			// no sub -- skip
+		i := strings.Index(target, p.b)
+		if i == -1 {
+			// not found -- skip
 			continue
 		}
-		var w string
-		w = word[:j] + p.b + word[j+len(p.a):]
+		w := target[:i] + p.a + target[i+len(p.b):]
 		if _, ok := seen[w]; ok {
-			// already seen -- skip
 			continue
 		}
 		seen[w] = struct{}{}
-		res = append(res, w)
-	}
-	return res
-}
-
-func solveFormula(curlevel int, curset []string, target string, subs []pair) int {
-	fmt.Println("Level is ", curlevel)
-	var nextset []string
-	for _, cur := range curset {
-		if cur == target {
-			return curlevel
-		}
-		nextset = append(nextset, generate(cur, subs)...)
-	}
-	for _, w := range nextset {
-		if w == target {
-			return curlevel
+		foundlevel := solveFormula(level+1, start, w, subs)
+		if foundlevel != -1 {
+			return foundlevel
 		}
 	}
-	return solveFormula(curlevel+1, nextset, target, subs)
+	return -1
 }
 
 func main() {
@@ -119,6 +104,6 @@ func main() {
 		fmt.Println(len(combos), " molecules")
 	}
 
-	level := solveFormula(0, []string{"e"}, formula, subs)
+	level := solveFormula(0, "e", formula, subs)
 	fmt.Println(level, " transformations to make target molecule")
 }
